@@ -9,6 +9,9 @@ def draw_grass():
     """ Draw Grass """
     arcade.draw_lrtb_rectangle_filled(0, 599, 300, 0, arcade.csscolor.GREEN)
 
+def draw_sun(x, y):
+    """ Draw Sun """
+    arcade.draw_circle_filled(600 + x - 600, 600+ x -600, 60, arcade.csscolor.YELLOW)
 
 def draw_house():
     """ Draw House """
@@ -21,8 +24,7 @@ def draw_house():
 
 def draw_bush(x, y):
     """ Draw Bush """
-    arcade.draw_circle_filled(270 + x, 210 + y, 25, arcade.csscolor.DARK_GREEN)
-
+    arcade.draw_circle_filled(270 + x - 270, 210 + y - 210, 25, arcade.csscolor.DARK_GREEN)
 
 def draw_sidewalk():
     """ Draw sidewalk """
@@ -34,9 +36,8 @@ def draw_sidewalk():
 
 def draw_tree(x, y):
     """ Draw Tree """
-    arcade.draw_lrtb_rectangle_filled(400 + x, 450 + x, 450 + y, 250 + y, arcade.csscolor.BROWN)
-    arcade.draw_circle_filled(425 + x, 450 + y, 75, arcade.csscolor.DARK_GREEN)
-
+    arcade.draw_lrtb_rectangle_filled(400 + x - 425, 450 + x - 425, 450 + y - 250, 250 + y - 250, arcade.csscolor.BROWN)
+    arcade.draw_circle_filled(425 + x - 425, 450 + y - 250, 75, arcade.csscolor.DARK_GREEN)
 
 def main():
     # Open Window
@@ -49,23 +50,23 @@ def main():
     arcade.start_render()
 
     draw_grass()
-    draw_tree(-360, 20)
-    draw_tree(100, 35)
-    draw_tree(-80, 20)
-    draw_tree(0, 0)
-    draw_bush(58, 35)
-    draw_bush(55, 65)
-    draw_bush(-198, 35)
-    draw_bush(-195, 65)
+    draw_tree(40, 270)
+    draw_tree(500, 285)
+    draw_tree(320, 270)
+    draw_tree(400, 250)
+    draw_bush(328, 245)
+    draw_bush(325, 275)
+    draw_bush(72, 245)
+    draw_bush(75, 275)
     draw_house()
     draw_sidewalk()
-    draw_bush(20, 0)
-    draw_bush(60, 0)
-    draw_bush(-20, 0)
-    draw_bush(-120, 0)
-    draw_bush(-160, 0)
-    draw_bush(-200, 0)
-
+    draw_bush(290, 210)
+    draw_bush(330, 210)
+    draw_bush(250, 210)
+    draw_bush(150, 210)
+    draw_bush(110, 210)
+    draw_bush(70, 210)
+    draw_sun(600, 600)
 
     # Finish Render
     arcade.finish_render()
