@@ -25,7 +25,7 @@ def draw_bush(x, y):
 
 
 def draw_sidewalk():
-    """ Draw Bush """
+    """ Draw sidewalk """
     arcade.draw_lrtb_rectangle_filled(160, 240, 199, 100, arcade.csscolor.GREY)
     arcade.draw_triangle_filled(240, 100, 160, 100, 160, 20, arcade.csscolor.GREY)
     arcade.draw_lrtb_rectangle_filled(0, 160, 100, 20, arcade.csscolor.GREY)
