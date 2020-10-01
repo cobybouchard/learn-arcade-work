@@ -21,7 +21,7 @@ def draw_section_1():
             x = 5  # Instead of zero, calculate the proper x location using 'column'
             y = 5  # Instead of zero, calculate the proper y location using 'row'
             arcade.draw_rectangle_filled(x, y, 5, 5, arcade.color.WHITE)
-            arcade.draw_rectangle_filled(x + 10, y, 5, 5, arcade.color.WHITE)
+            arcade.draw_rectangle_filled(x, y + 10, 5, 5, arcade.color.WHITE)
 
 
 def draw_section_2():
