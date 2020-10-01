@@ -1,5 +1,6 @@
 import random
 
+
 def main():
     print("Welcome to Camel!")
     print("""You have stolen a Camel to get across the Sahara Desert.
@@ -28,7 +29,7 @@ Hint: Conserve your resources""")
         d. Drink for your canteen
         e. Status check
         q. Quit""")
-        print()
+
         userInput = input("What do you choose? ")
         if userInput.lower() == "q":
             done = True
@@ -54,9 +55,9 @@ Hint: Conserve your resources""")
             nativesFlank = random.randrange(1, 20)
 
         # Stop for the night
-        elif userInput.lower() == "c":
+        elif userInput.lower() == "c" and not done:
             print("Your camel is fully rested.")
-            nativesTraveled += random.randrange(7, 12)
+            nativesTraveled += random.randrange(7, 13)
             camelFatigue *= 0
 
         # Drink from your canteen
@@ -75,7 +76,7 @@ Hint: Conserve your resources""")
             print("The natives are", nativesBehind, "miles behind you.")
             print("You have", canteen, "drinks remaining")
 
-        if oasis == 15:
+        if oasis == 15 and not done:
             print("""You lucked out. You stumbled upon an oasis.
 You are fully hydrated and your hors is fully rested.
 You also refilled your canteen.""")
@@ -83,18 +84,18 @@ You also refilled your canteen.""")
             camelFatigue *= 0
             canteen = 3
 
-        if nativesFlank == 15:
+        if nativesFlank == 15 and not done:
             nativesTraveled += 20
             print("The natives have found a shortcut and gained some ground.")
 
-        if 4 < thirst <= 6:
+        if 4 < thirst <= 6 and not done:
             print("You are thirsty.")
 
         if thirst > 6:
             print("You died of dehydration!")
             done = True
 
-        if 5 < camelFatigue <= 8:
+        if 5 < camelFatigue <= 8 and not done:
             print("Your camel is tired.")
 
         if camelFatigue > 8:
@@ -108,13 +109,14 @@ their camel.""")
 camp when you died of dehydration because they took your water.""")
             done = True
 
-        if playerTraveled == 200:
+        if playerTraveled >= 200 and not done:
             print("""You made it out of the desert and have outrun the natives.
                   YOU WON!""")
             done = True
 
-        if nativesBehind <= 15:
+        if nativesBehind <= 15 and not done:
             print("The natives are getting close.")
             print("They are", nativesBehind, "miles behind you.")
+
 
 main()
