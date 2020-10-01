@@ -29,6 +29,7 @@ Hint: Conserve your resources""")
         d. Drink for your canteen
         e. Status check
         q. Quit""")
+        print()
 
         userInput = input("What do you choose? ")
         if userInput.lower() == "q":
