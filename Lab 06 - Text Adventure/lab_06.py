@@ -1,6 +1,6 @@
 import arcade
 
-class MyRoom:
+class Room:
 
     def __init__(self):
         self.description = ""
@@ -9,7 +9,12 @@ class MyRoom:
         self.south = 0
         self.west = 0
 
+
 def main():
+    room_list = []
+    done = False
+    room_list.append()
+    while not done:
     pass
 
 main()
