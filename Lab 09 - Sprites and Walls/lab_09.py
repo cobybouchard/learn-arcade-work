@@ -13,19 +13,22 @@ import random
 import arcade
 import os
 
-SPRITE_SCALING = 0.5
 
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 SCREEN_TITLE = "Sprite Move with Scrolling Screen Example"
-PLAYER_SPRITE_SCALING = 0.5
+PLAYER_SPRITE_SCALING = 0.25
 WALL_SPRITE_SCALING = 0.5
-COIN_SPRITE_SCALING = 0.5
+COIN_SPRITE_SCALING = 0.3
+GEM_SPRITE_SCALING = 0.3
 # How many pixels to keep as a minimum margin between the character
 # and the edge of the screen.
 VIEWPORT_MARGIN = 200
 
 MOVEMENT_SPEED = 5
+
+COIN_COUNT = 25
+GEM_COUNT = 5
 
 
 class MyGame(arcade.Window):
@@ -46,12 +49,12 @@ class MyGame(arcade.Window):
 
         # Sprite lists
         self.player_list = None
+        self.wall_list = None
+        self.coin_list = None
+        self.gem_list = None
 
         # Set up the player
         self.player_sprite = None
-
-        self.coin_list = None
-        self.wall_list = None
 
         self.physics_engine = None
 
@@ -66,6 +69,7 @@ class MyGame(arcade.Window):
         self.player_list = arcade.SpriteList()
         self.wall_list = arcade.SpriteList()
         self.coin_list = arcade.SpriteList()
+        self.gem_list = arcade.SpriteList()
 
         # Set up the player
         self.player_sprite = arcade.Sprite("alienBlue_walk2.png", PLAYER_SPRITE_SCALING)
@@ -74,7 +78,7 @@ class MyGame(arcade.Window):
         self.player_list.append(self.player_sprite)
 
         # -- Set up border walls
-        for x in range(50, 1500, 1408):
+        for x in range(50, 1459, 1408):
             for y in range(50, 1050, 64):
                 wall = arcade.Sprite("boxCrate.png", WALL_SPRITE_SCALING)
                 wall.center_x = x
@@ -86,12 +90,42 @@ class MyGame(arcade.Window):
                 wall.center_x = x
                 wall.center_y = y
                 self.wall_list.append(wall)
-        for y in range(560, 566, 1):
+        for y in range(560, 561, 1):
             for x in range(114, 1200, 64):
                 wall = arcade.Sprite("boxCrate.png", WALL_SPRITE_SCALING)
                 wall.center_x = x
                 wall.center_y = y
                 self.wall_list.append(wall)
+        for x in range(275, 1126, 125):
+            for y in range(114, 561, 64):
+                if random.randrange(4) > 1:
+                    wall = arcade.Sprite("boxCrate.png", WALL_SPRITE_SCALING)
+                    wall.center_x = x
+                    wall.center_y = y
+                    self.wall_list.append(wall)
+        for x in range(275, 1126, 125):
+            for y in range(625, 1003, 64):
+                if random.randrange(4) > 1:
+                    wall = arcade.Sprite("boxCrate.png", WALL_SPRITE_SCALING)
+                    wall.center_x = x
+                    wall.center_y = y
+                    self.wall_list.append(wall)
+
+        for i in range(COIN_COUNT):
+            coin = arcade.Sprite("coinGold.png", COIN_SPRITE_SCALING)
+
+            coin.center_x = random.randrange(1408)
+            coin.center_y = random.randrange(1000)
+
+            self.coin_list.append(coin)
+
+        for i in range(GEM_COUNT):
+            gem = arcade.Sprite("gemBlue.png", GEM_SPRITE_SCALING)
+
+            gem.center_x = random.randrange(1408)
+            gem.center_y = random.randrange(1000)
+
+            self.gem_list.append(gem)
 
         self.physics_engine = arcade.PhysicsEngineSimple(self.player_sprite, self.wall_list)
 
@@ -115,6 +149,7 @@ class MyGame(arcade.Window):
         self.wall_list.draw()
         self.player_list.draw()
         self.coin_list.draw()
+        self.gem_list.draw()
 
     def on_key_press(self, key, modifiers):
         """Called whenever a key is pressed. """
@@ -186,6 +221,17 @@ class MyGame(arcade.Window):
                                 SCREEN_WIDTH + self.view_left,
                                 self.view_bottom,
                                 SCREEN_HEIGHT + self.view_bottom)
+        self.coin_list.update()
+
+        # Generate a list of all sprites that collided with the player.
+        coins_hit_list = arcade.check_for_collision_with_list(self.player_sprite,
+                                                              self.coin_list)
+
+        # Loop through each colliding sprite, remove it, and add to the score.
+        for coin in coins_hit_list:
+            coin.remove_from_sprite_lists()
+            self.score += 1
+
 
 
 def main():

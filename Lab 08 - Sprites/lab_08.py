@@ -60,7 +60,6 @@ class MyGame(arcade.Window):
         super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, "Sprite Lab")
 
         # Sprite lists
-        self.game_over = arcade.load_sound("gameover5.wav")
         self.rock_sound = arcade.load_sound("hit1.wav")
         self.coin_sound = arcade.load_sound("coin1.wav")
 
@@ -157,9 +156,6 @@ class MyGame(arcade.Window):
             coin.remove_from_sprite_lists()
             self.score += 1
             arcade.play_sound(self.coin_sound)
-
-        if self.coin_list == 0:
-            arcade.close_window()
 
         self.rock_list.update()
         # Check to see if the character hit the rock
