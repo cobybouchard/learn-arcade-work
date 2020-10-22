@@ -19,8 +19,8 @@ SCREEN_HEIGHT = 600
 SCREEN_TITLE = "Sprite Move with Scrolling Screen Example"
 PLAYER_SPRITE_SCALING = 0.25
 WALL_SPRITE_SCALING = 0.5
-COIN_SPRITE_SCALING = 0.3
-GEM_SPRITE_SCALING = 0.3
+COIN_SPRITE_SCALING = 0.25
+GEM_SPRITE_SCALING = 0.25
 # How many pixels to keep as a minimum margin between the character
 # and the edge of the screen.
 VIEWPORT_MARGIN = 200
@@ -55,12 +55,16 @@ class MyGame(arcade.Window):
 
         # Set up the player
         self.player_sprite = None
+        self.score = 0
 
         self.physics_engine = None
 
         # Used in scrolling
         self.view_bottom = 0
         self.view_left = 0
+
+        self.coin_sound = arcade.load_sound("coin5.wav")
+        self.gem_sound = arcade.load_sound("coin1.wav")
 
     def setup(self):
         """ Set up the game and initialize the variables. """
@@ -70,6 +74,8 @@ class MyGame(arcade.Window):
         self.wall_list = arcade.SpriteList()
         self.coin_list = arcade.SpriteList()
         self.gem_list = arcade.SpriteList()
+
+        self.score = 0
 
         # Set up the player
         self.player_sprite = arcade.Sprite("alienBlue_walk2.png", PLAYER_SPRITE_SCALING)
@@ -114,16 +120,44 @@ class MyGame(arcade.Window):
         for i in range(COIN_COUNT):
             coin = arcade.Sprite("coinGold.png", COIN_SPRITE_SCALING)
 
-            coin.center_x = random.randrange(1408)
-            coin.center_y = random.randrange(1000)
+            coin_placed_successfully = False
 
+            # Keep trying until success
+            while not coin_placed_successfully:
+                # Position the coin
+                coin.center_x = random.randrange(50, 1408)
+                coin.center_y = random.randrange(50, 1000)
+
+                # See if the coin is hitting a wall
+                wall_hit_list = arcade.check_for_collision_with_list(coin, self.wall_list)
+
+                # See if the coin is hitting another coin
+                coin_coin_hit_list = arcade.check_for_collision_with_list(coin, self.coin_list)
+
+                if len(wall_hit_list) == 0 and len(coin_coin_hit_list) == 0:
+                    # It is!
+                    coin_placed_successfully = True
+
+            # Add the coin to the lists
             self.coin_list.append(coin)
 
         for i in range(GEM_COUNT):
             gem = arcade.Sprite("gemBlue.png", GEM_SPRITE_SCALING)
+            gem_placed_successfully = False
 
-            gem.center_x = random.randrange(1408)
-            gem.center_y = random.randrange(1000)
+            # Keep trying until success
+            while not gem_placed_successfully:
+                gem.center_x = random.randrange(50, 1408)
+                gem.center_y = random.randrange(50, 1000)
+
+                gem_wall_hit_list = arcade.check_for_collision_with_list(gem, self.wall_list)
+
+                gem_gem_hit_list = arcade.check_for_collision_with_list(gem, self.gem_list)
+
+                gem_coin_hit_list = arcade.check_for_collision_with_list(gem, self.coin_list)
+
+                if len(gem_wall_hit_list) == 0 and len(gem_gem_hit_list) == 0 and len(gem_coin_hit_list) == 0:
+                    gem_placed_successfully = True
 
             self.gem_list.append(gem)
 
@@ -151,6 +185,13 @@ class MyGame(arcade.Window):
         self.coin_list.draw()
         self.gem_list.draw()
 
+        output = f"Score: {self.score}"
+        arcade.draw_text(output, self.view_left + 10, self.view_bottom + 20, arcade.color.WHITE, 14)
+
+        if len(self.coin_list) == 0 and len(self.gem_list) == 0:
+            arcade.draw_text("Game Over", self.view_left + 250, self.view_bottom + 300,
+                             arcade.color.WHITE, 50)
+
     def on_key_press(self, key, modifiers):
         """Called whenever a key is pressed. """
 
@@ -176,7 +217,8 @@ class MyGame(arcade.Window):
 
         # Call update on all sprites (The sprites don't do much in this
         # example though.)
-        self.physics_engine.update()
+        if len(self.coin_list) != 0 or len(self.gem_list) != 0:
+            self.physics_engine.update()
 
         # --- Manage Scrolling ---
 
@@ -223,15 +265,23 @@ class MyGame(arcade.Window):
                                 SCREEN_HEIGHT + self.view_bottom)
         self.coin_list.update()
 
-        # Generate a list of all sprites that collided with the player.
         coins_hit_list = arcade.check_for_collision_with_list(self.player_sprite,
                                                               self.coin_list)
 
-        # Loop through each colliding sprite, remove it, and add to the score.
         for coin in coins_hit_list:
             coin.remove_from_sprite_lists()
             self.score += 1
+            arcade.play_sound(self.coin_sound)
 
+        self.gem_list.update()
+
+        gem_hit_list = arcade.check_for_collision_with_list(self.player_sprite,
+                                                            self.gem_list)
+
+        for gem in gem_hit_list:
+            gem.remove_from_sprite_lists()
+            self.score += 5
+            arcade.play_sound(self.gem_sound)
 
 
 def main():
