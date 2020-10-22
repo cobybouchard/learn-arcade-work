@@ -140,8 +140,9 @@ class MyGame(arcade.Window):
 
     def on_mouse_motion(self, x, y, dx, dy):
         # Move the Sprite
-        self.player_sprite.center_x = x
-        self.player_sprite.center_y = y
+        if len(self.coin_list) != 0:
+            self.player_sprite.center_x = x
+            self.player_sprite.center_y = y
 
     def update(self, delta_time):
         """ Movement and game logic """
@@ -157,7 +158,8 @@ class MyGame(arcade.Window):
             self.score += 1
             arcade.play_sound(self.coin_sound)
 
-        self.rock_list.update()
+        if len(self.coin_list) != 0:
+            self.rock_list.update()
         # Check to see if the character hit the rock
         rock_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.rock_list)
 
@@ -166,7 +168,6 @@ class MyGame(arcade.Window):
             rock.remove_from_sprite_lists()
             self.score -= 1
             arcade.play_sound(self.rock_sound)
-
 
 
 def main():
