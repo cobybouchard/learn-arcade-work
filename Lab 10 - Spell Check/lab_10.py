@@ -28,6 +28,7 @@ def main():
 
         for word in word_list:
             current_list_position = 0
+
             while current_list_position < len(dictionary_list) and dictionary_list[current_list_position] != word.upper():
                 current_list_position += 1
 
@@ -45,10 +46,12 @@ def main():
     for line in my_text:
         current_line += 1
         word_list = split_line(line)
+
         for word in word_list:
             lower_bound = 0
             upper_bound = len(dictionary_list) - 1
             found = False
+
             while lower_bound <= upper_bound and not found:
                 middle_pos = (lower_bound + upper_bound) // 2
 
