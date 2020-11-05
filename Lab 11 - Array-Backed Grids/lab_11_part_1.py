@@ -77,21 +77,29 @@ class MyGame(arcade.Window):
         column = x // (WIDTH + MARGIN)
         row = y // (HEIGHT + MARGIN)
 
-        print(f"Click coordinates: ({x}, {y}). Grid coordinates: ({row}, {column})")
+        print(f"Click coordinates: ({x}, {y}). \nGrid coordinates: ({row}, {row + 1}, {row - 1}, {column}, {column + 1}, {column - 1})")
 
         # Make sure we are on-grid. It is possible to click in the upper right
         # corner in the margin and go to a grid location that doesn't exist
-        if row < ROW_COUNT and column < COLUMN_COUNT:
+        if row <= ROW_COUNT and column <= COLUMN_COUNT:
 
             # Flip the location between 1 and 0.
             if self.grid[row][column] == 0:
                 self.grid[row][column] = 1
+                self.grid[row + 1][column] = 1
+                self.grid[row - 1][column] = 1
+                self.grid[row][column + 1] = 1
+                self.grid[row][column - 1] = 1
+
             else:
                 self.grid[row][column] = 0
+                self.grid[row + 1][column] = 0
+                self.grid[row - 1][column] = 0
+                self.grid[row][column + 1] = 0
+                self.grid[row][column - 1] = 0
 
 
 def main():
-
     window = MyGame(SCREEN_WIDTH, SCREEN_HEIGHT)
     arcade.run()
 
