@@ -77,7 +77,7 @@ class MyGame(arcade.Window):
         column = x // (WIDTH + MARGIN)
         row = y // (HEIGHT + MARGIN)
 
-        print(f"Click coordinates: ({x}, {y}). \nGrid coordinates: ({row}, {row + 1}, {row - 1}, {column}, {column + 1}, {column - 1})")
+        print(f"Click coordinates: ({x}, {y}). \nGrid coordinates: ({row}, {column})")
 
         # Make sure we are on-grid. It is possible to click in the upper right
         # corner in the margin and go to a grid location that doesn't exist
@@ -86,17 +86,32 @@ class MyGame(arcade.Window):
             # Flip the location between 1 and 0.
             if self.grid[row][column] == 0:
                 self.grid[row][column] = 1
-                self.grid[row + 1][column] = 1
-                self.grid[row - 1][column] = 1
-                self.grid[row][column + 1] = 1
-                self.grid[row][column - 1] = 1
-
             else:
                 self.grid[row][column] = 0
-                self.grid[row + 1][column] = 0
-                self.grid[row - 1][column] = 0
-                self.grid[row][column + 1] = 0
+
+            # Left
+            if column > 0 and self.grid[row][column - 1] == 0:
+                self.grid[row][column - 1] = 1
+            elif column > 0 and self.grid[row][column - 1] == 1:
                 self.grid[row][column - 1] = 0
+
+            # Right
+            if column < COLUMN_COUNT - 1 and self.grid[row][column + 1] == 0:
+                self.grid[row][column + 1] = 1
+            elif column < COLUMN_COUNT - 1 and self.grid[row][column + 1] == 1:
+                self.grid[row][column + 1] = 0
+
+            # Top
+            if row < ROW_COUNT - 1 and self.grid[row + 1][column] == 0:
+                self.grid[row + 1][column] = 1
+            elif row < ROW_COUNT - 1 and self.grid[row + 1][column] == 1:
+                self.grid[row + 1][column] = 0
+
+            # Bottom
+            if row > 0 and self.grid[row - 1][column] == 0:
+                self.grid[row - 1][column] = 1
+            elif row > 0 and self.grid[row - 1][column] == 1:
+                self.grid[row - 1][column] = 0
 
 
 def main():
