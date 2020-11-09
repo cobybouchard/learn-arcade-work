@@ -1,5 +1,5 @@
 """
-Array Backed Grid version 2
+Array Backed Grid
 
 Show how to use a two-dimensional list/array to back the display of a
 grid on-screen.
@@ -33,7 +33,6 @@ class MyGame(arcade.Window):
         Set up the application.
         """
         super().__init__(width, height)
-
         # Create a 2 dimensional array. A two dimensional
         # array is simply a list of lists.
         self.grid = []
@@ -46,42 +45,34 @@ class MyGame(arcade.Window):
 
         arcade.set_background_color(arcade.color.BLACK)
 
-        """ Create a list to hold buffered shapes, and load the list """
-        self.grid_shape_list = None
-        self.create_shapes_from_grid()
-
-    def create_shapes_from_grid(self):
-        """ This creates a list of buffered shapes, and loads the
-        rectangles into that list for faster display. """
-        self.grid_shape_list = arcade.ShapeElementList()
-
-        for row in range(ROW_COUNT):
-            for column in range(COLUMN_COUNT):
-
-                # Figure out what color to draw the box
-                if self.grid[row][column] == 1:
-                    color = arcade.color.GREEN
-                else:
-                    color = arcade.color.WHITE
-
-                # Figure where to put the box
-                x = (MARGIN + WIDTH) * column + MARGIN + WIDTH // 2
-                y = (MARGIN + HEIGHT) * row + MARGIN + HEIGHT // 2
-
-                # Create the box and add to the list
-                rectangle = arcade.create_rectangle_filled(x, y, WIDTH, HEIGHT, color)
-                self.grid_shape_list.append(rectangle)
-
     def on_draw(self):
-        """ Render the screen. """
+        """
+        Render the screen.
+        """
 
         # This command has to happen before we start drawing
         arcade.start_render()
 
-        self.grid_shape_list.draw()
+        # Draw the grid
+        for row in range(ROW_COUNT):
+            for column in range(COLUMN_COUNT):
+                # Figure out what color to draw the box
+                if self.grid[row][column] == 1:
+                    color = arcade.color.RED
+                else:
+                    color = arcade.color.YELLOW
+
+                # Do the math to figure out where the box is
+                x = (MARGIN + WIDTH) * column + MARGIN + WIDTH // 2
+                y = (MARGIN + HEIGHT) * row + MARGIN + HEIGHT // 2
+
+                # Draw the box
+                arcade.draw_rectangle_filled(x, y, WIDTH, HEIGHT, color)
 
     def on_mouse_press(self, x, y, button, modifiers):
-        """ Called when the user presses a mouse button. """
+        """
+        Called when the user presses a mouse button.
+        """
 
         # Change the x/y screen coordinates to grid coordinates
         column = x // (WIDTH + MARGIN)
@@ -99,11 +90,44 @@ class MyGame(arcade.Window):
             else:
                 self.grid[row][column] = 0
 
-        self.create_shapes_from_grid()
+            total_selected_cells = 0
+
+            for row in range(ROW_COUNT):
+                for column in range(COLUMN_COUNT):
+                    if self.grid[row][column] == 1:
+                        total_selected_cells += 1
+            print("There are ", total_selected_cells, " cells selected.")
+
+            column_cells = 0
+
+            for column in range(COLUMN_COUNT):
+                for row in range(ROW_COUNT):
+                    if self.grid[row][column] == 1:
+                        column_cells += 1
+                print("There are", column_cells, "cells selected in column", column, ".")
+                column_cells = 0
+
+            row_cells = 0
+
+            for row in range(ROW_COUNT):
+                for column in range(COLUMN_COUNT):
+                    if self.grid[row][column] == 1:
+                        row_cells += 1
+                print("There are", row_cells, "cells selected in row", row, ".")
+                row_cells = 0
+
+            continuous_count = 0
+
+            for row in range(ROW_COUNT):
+                for column in range(COLUMN_COUNT):
+                    if self.grid[row][column] == 1:
+                        continuous_count += 1
+                    if continuous_count > 2:
+                        print(f"There are", str(continuous_count), "continuous cells selected on row", str(row), ".")
+                        continuous_count = 0
 
 
 def main():
-
     window = MyGame(SCREEN_WIDTH, SCREEN_HEIGHT)
     arcade.run()
 
