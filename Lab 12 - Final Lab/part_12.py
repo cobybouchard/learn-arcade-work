@@ -88,6 +88,8 @@ class MyWindow(arcade.Window):
         # Physics engine
         self.physics_engine = None
 
+        self.gem_sound = arcade.load_sound("coin1.wav")
+
         # Used for scrolling map
         self.view_left = 0
         self.view_bottom = 0
@@ -96,6 +98,7 @@ class MyWindow(arcade.Window):
         """ Set up the game and initialize the variables. """
 
         # Sprite lists
+        global wall
         self.player_list = arcade.SpriteList()
         self.wall_list = arcade.SpriteList()
         self.lava_list = arcade.SpriteList()
@@ -107,11 +110,11 @@ class MyWindow(arcade.Window):
 
         # Starting position of the player
         self.player_sprite.center_x = 90
-        self.player_sprite.center_y = 270
+        self.player_sprite.center_y = -40
         self.player_list.append(self.player_sprite)
 
         # Get a 2D array made of numbers based on the map
-        map_array = get_map("my_map_Walls.csv")
+        map_array = get_map("my_map.csv")
 
         # Now that we've got the map, loop through and create the sprites
         for row_index in range(len(map_array)):
@@ -145,6 +148,12 @@ class MyWindow(arcade.Window):
                     wall = arcade.Sprite("grassHalf_mid.png", SPRITE_SCALING)
                 elif item == 12:
                     wall = arcade.Sprite("grassHalf_right.png", SPRITE_SCALING)
+                elif item == 13:
+                    lava = arcade.Sprite("lavaTop_low.png", SPRITE_SCALING)
+                elif item == 14:
+                    lava = arcade.Sprite("lava.png", SPRITE_SCALING)
+                elif item == 15:
+                    lava = arcade.Sprite("lavaTop_high.png", SPRITE_SCALING)
                 if 0 <= item <= 12:
                     # Calculate where the sprite goes
                     wall.left = column_index * SCALED_TILE_SIZE
@@ -153,7 +162,12 @@ class MyWindow(arcade.Window):
                     # Add the sprite
                     self.wall_list.append(wall)
 
-        map_array = get_map("my_map_Walls.csv")
+                elif 13 <= item <= 15:
+                    lava.left = column_index * SCALED_TILE_SIZE
+                    lava.top = (MAP_HEIGHT - row_index) * SCALED_TILE_SIZE
+
+                    self.lava_list.append(lava)
+
 
         # Create out platformer physics engine with gravity
         self.physics_engine = arcade.PhysicsEnginePlatformer(self.player_sprite,
@@ -187,6 +201,7 @@ class MyWindow(arcade.Window):
         self.wall_list.draw()
         self.player_list.draw()
         self.gem_list.draw()
+        self.lava_list.draw()
 
         if len(self.gem_list) == 0:
             arcade.draw_text("You win", 2800, 175, arcade.color.WHITE, 50)
@@ -261,7 +276,7 @@ class MyWindow(arcade.Window):
 
         for self.gem_sprite in gem_hit_list:
             self.gem_sprite.remove_from_sprite_lists()
-
+            arcade.play_sound(self.gem_sound)
 
 def main():
     window = MyWindow()
