@@ -8,6 +8,7 @@ import arcade
 
 SPRITE_SCALING = 0.5
 PLAYER_SPRITE_SCALING = 0.4
+LASER_SPRITE_SCALING = 0.25
 
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
@@ -24,9 +25,10 @@ SCALED_TILE_SIZE = TILE_SIZE * SPRITE_SCALING
 MAP_HEIGHT = 7
 
 # Physics
-MOVEMENT_SPEED = 5
-JUMP_SPEED = 14
+MOVEMENT_SPEED = 3
+JUMP_SPEED = 10
 GRAVITY = 0.5
+LASER_SPEED = 20
 
 
 def get_map(filename):
@@ -79,16 +81,19 @@ class MyWindow(arcade.Window):
         self.lava_list = None
         self.coin_list = None
         self.gem_list = None
+        self.laser_list = None
+        self.enemy_list = None
 
         # Set up the player
         self.player_sprite = None
-
         self.gem_sprite = None
+        self.laser_sprite = None
 
         # Physics engine
         self.physics_engine = None
 
         self.gem_sound = arcade.load_sound("coin1.wav")
+        self.game_over_sound = arcade.load_sound("gameover3.wav")
 
         # Used for scrolling map
         self.view_left = 0
@@ -98,12 +103,13 @@ class MyWindow(arcade.Window):
         """ Set up the game and initialize the variables. """
 
         # Sprite lists
-        global wall
         self.player_list = arcade.SpriteList()
         self.wall_list = arcade.SpriteList()
         self.lava_list = arcade.SpriteList()
         self.coin_list = arcade.SpriteList()
         self.gem_list = arcade.SpriteList()
+        self.laser_list = arcade.SpriteList()
+        self.enemy_list = arcade.SpriteList()
 
         # Set up the player
         self.player_sprite = arcade.Sprite("alienBlue_walk2.png", PLAYER_SPRITE_SCALING)
@@ -168,7 +174,6 @@ class MyWindow(arcade.Window):
 
                     self.lava_list.append(lava)
 
-
         # Create out platformer physics engine with gravity
         self.physics_engine = arcade.PhysicsEnginePlatformer(self.player_sprite,
                                                              self.wall_list,
@@ -178,8 +183,20 @@ class MyWindow(arcade.Window):
 
         # Starting position of the player
         self.gem_sprite.center_x = 3100
-        self.gem_sprite.center_y = 0
+        self.gem_sprite.center_y = -128
         self.gem_list.append(self.gem_sprite)
+
+        enemy = arcade.Sprite("wormPink.png", SPRITE_SCALING)
+        enemy.center_x = 1375
+        enemy.center_y = 0
+
+        self.enemy_list.append(enemy)
+
+        enemy = arcade.Sprite("wormPink.png", SPRITE_SCALING)
+        enemy.center_x = 2430
+        enemy.center_y = 25
+
+        self.enemy_list.append(enemy)
 
         # Set the background color
         arcade.set_background_color(arcade.color.SKY_BLUE)
@@ -202,24 +219,41 @@ class MyWindow(arcade.Window):
         self.player_list.draw()
         self.gem_list.draw()
         self.lava_list.draw()
+        self.laser_list.draw()
+        self.enemy_list.draw()
 
         if len(self.gem_list) == 0:
-            arcade.draw_text("You win", 2800, 175, arcade.color.WHITE, 50)
+            arcade.draw_text("You Win", 2800, 175, arcade.color.WHITE, 50)
+        if len(self.player_list) == 0:
+            arcade.draw_text("Game Over", self.player_sprite.center_x, self.player_sprite.center_y + 40,
+                             arcade.color.BLACK, 50)
 
     def on_key_press(self, key, modifiers):
         """
         Called whenever the mouse moves.
         """
+        if len(self.player_list) != 0 and len(self.gem_list) != 0:
+            if key == arcade.key.UP:
+                # This line below is new. It checks to make sure there is a platform underneath
+                # the player. Because you can't jump if there isn't ground beneath your feet.
+                if self.physics_engine.can_jump():
+                    self.player_sprite.change_y = JUMP_SPEED
+            elif key == arcade.key.LEFT:
+                self.player_sprite.change_x = -MOVEMENT_SPEED
+            elif key == arcade.key.RIGHT:
+                self.player_sprite.change_x = MOVEMENT_SPEED
+            if key == arcade.key.SPACE:
+                self.laser_sprite = arcade.Sprite("slimeGreen.png", LASER_SPRITE_SCALING)
+                # The image points to the right, and we want it to point up. So
+                # rotate it.
 
-        if key == arcade.key.UP:
-            # This line below is new. It checks to make sure there is a platform underneath
-            # the player. Because you can't jump if there isn't ground beneath your feet.
-            if self.physics_engine.can_jump():
-                self.player_sprite.change_y = JUMP_SPEED
-        elif key == arcade.key.LEFT:
-            self.player_sprite.change_x = -MOVEMENT_SPEED
-        elif key == arcade.key.RIGHT:
-            self.player_sprite.change_x = MOVEMENT_SPEED
+                # Position the bullet
+                self.laser_sprite.center_x = self.player_sprite.center_x + 20
+                self.laser_sprite.center_y = self.player_sprite.center_y
+                self.laser_sprite.change_x = LASER_SPEED
+
+                # Add the bullet to the appropriate lists
+                self.laser_list.append(self.laser_sprite)
 
     def on_key_release(self, key, modifiers):
         """
@@ -278,10 +312,34 @@ class MyWindow(arcade.Window):
             self.gem_sprite.remove_from_sprite_lists()
             arcade.play_sound(self.gem_sound)
 
+        self.player_list.update()
+
+        lava_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.lava_list)
+
+        for self.player_sprite in lava_hit_list:
+            self.player_sprite.remove_from_sprite_lists()
+            arcade.play_sound(self.game_over_sound)
+
+        player_enemy_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.enemy_list)
+
+        for self.player_sprite in player_enemy_hit_list:
+            self.player_sprite.remove_from_sprite_lists()
+            arcade.play_sound(self.game_over_sound)
+
+        self.enemy_list.update()
+        self.laser_list.update()
+
+        for enemy in self.enemy_list:
+            laser_hit_list = arcade.check_for_collision_with_list(enemy, self.laser_list)
+
+            for laser_hit in laser_hit_list:
+                laser_hit.remove_from_sprite_lists()
+                enemy.remove_from_sprite_lists()
+
+
 def main():
     window = MyWindow()
     window.setup()
-
     arcade.run()
 
 
