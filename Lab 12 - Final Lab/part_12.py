@@ -16,7 +16,6 @@ SCREEN_HEIGHT = 600
 # How many pixels to keep as a minimum margin between the character
 # and the edge of the screen.
 BOTTOM_MARGIN = 80
-TOP_MARGIN = 25
 RIGHT_MARGIN = 200
 LEFT_MARGIN = 60
 
@@ -88,12 +87,16 @@ class MyWindow(arcade.Window):
         self.player_sprite = None
         self.gem_sprite = None
         self.laser_sprite = None
+        self.score = None
 
         # Physics engine
         self.physics_engine = None
 
         self.gem_sound = arcade.load_sound("coin1.wav")
         self.game_over_sound = arcade.load_sound("gameover3.wav")
+        self.laser_sound = arcade.load_sound("laser2.wav")
+        self.enemy_sound = arcade.load_sound("hurt5.wav")
+        self.coin_sound = arcade.load_sound("coin5.wav")
 
         # Used for scrolling map
         self.view_left = 0
@@ -111,6 +114,8 @@ class MyWindow(arcade.Window):
         self.laser_list = arcade.SpriteList()
         self.enemy_list = arcade.SpriteList()
 
+        self.score = 0
+
         # Set up the player
         self.player_sprite = arcade.Sprite("alienBlue_walk2.png", PLAYER_SPRITE_SCALING)
 
@@ -127,6 +132,8 @@ class MyWindow(arcade.Window):
             for column_index in range(len(map_array[row_index])):
 
                 item = map_array[row_index][column_index]
+                lava = None
+                wall = None
 
                 if item == 0:
                     wall = arcade.Sprite("grassHill_left.png", SPRITE_SCALING)
@@ -193,10 +200,83 @@ class MyWindow(arcade.Window):
         self.enemy_list.append(enemy)
 
         enemy = arcade.Sprite("wormPink.png", SPRITE_SCALING)
-        enemy.center_x = 2430
-        enemy.center_y = 25
+        enemy.center_x = 2400
+        enemy.center_y = 110
 
         self.enemy_list.append(enemy)
+
+        enemy = arcade.Sprite("wormPink.png", SPRITE_SCALING)
+        enemy.center_x = 2940
+        enemy.center_y = 55
+
+        self.enemy_list.append(enemy)
+
+        coin = arcade.Sprite("coinGold.png", SPRITE_SCALING)
+        coin.center_x = 540
+        coin.center_y = 35
+
+        self.coin_list.append(coin)
+
+        coin = arcade.Sprite("coinGold.png", SPRITE_SCALING)
+        coin.center_x = 790
+        coin.center_y = -160
+
+        self.coin_list.append(coin)
+
+        coin = arcade.Sprite("coinGold.png", SPRITE_SCALING)
+        coin.center_x = 1375
+        coin.center_y = 180
+
+        self.coin_list.append(coin)
+
+        coin = arcade.Sprite("coinGold.png", SPRITE_SCALING)
+        coin.center_x = 1693
+        coin.center_y = -100
+
+        self.coin_list.append(coin)
+
+        coin = arcade.Sprite("coinGold.png", SPRITE_SCALING)
+        coin.center_x = 1693
+        coin.center_y = -37
+
+        self.coin_list.append(coin)
+
+        coin = arcade.Sprite("coinGold.png", SPRITE_SCALING)
+        coin.center_x = 1693
+        coin.center_y = 30
+
+        self.coin_list.append(coin)
+
+        coin = arcade.Sprite("coinGold.png", SPRITE_SCALING)
+        coin.center_x = 1821
+        coin.center_y = -37
+
+        self.coin_list.append(coin)
+
+        coin = arcade.Sprite("coinGold.png", SPRITE_SCALING)
+        coin.center_x = 1821
+        coin.center_y = 30
+
+        self.coin_list.append(coin)
+
+        coin = arcade.Sprite("coinGold.png", SPRITE_SCALING)
+        coin.center_x = 1952
+        coin.center_y = 30
+
+        self.coin_list.append(coin)
+
+        coin = arcade.Sprite("coinGold.png", SPRITE_SCALING)
+        coin.center_x = 2400
+        coin.center_y = 210
+
+        self.coin_list.append(coin)
+
+        for x in range(3100, 3102, 1):
+            for y in range(0, 250, 50):
+                coin = arcade.Sprite("coinGold.png", SPRITE_SCALING)
+                coin.center_x = x
+                coin.center_y = y
+                self.coin_list.append(coin)
 
         # Set the background color
         arcade.set_background_color(arcade.color.SKY_BLUE)
@@ -221,12 +301,16 @@ class MyWindow(arcade.Window):
         self.lava_list.draw()
         self.laser_list.draw()
         self.enemy_list.draw()
+        self.coin_list.draw()
+
+        output = f"Score: {self.score}"
+        arcade.draw_text(output, self.view_left + 10, self.view_bottom + 20, arcade.color.BLACK, 14)
 
         if len(self.gem_list) == 0:
-            arcade.draw_text("You Win", 2800, 175, arcade.color.WHITE, 50)
+            arcade.draw_text("You Win", 325 + self.view_left, 125, arcade.color.BLACK, 75)
         if len(self.player_list) == 0:
-            arcade.draw_text("Game Over", self.player_sprite.center_x, self.player_sprite.center_y + 40,
-                             arcade.color.BLACK, 50)
+            arcade.draw_text("Game Over", 250 + self.view_left, 125,
+                             arcade.color.BLACK, 75)
 
     def on_key_press(self, key, modifiers):
         """
@@ -243,6 +327,7 @@ class MyWindow(arcade.Window):
             elif key == arcade.key.RIGHT:
                 self.player_sprite.change_x = MOVEMENT_SPEED
             if key == arcade.key.SPACE:
+                arcade.play_sound(self.laser_sound)
                 self.laser_sprite = arcade.Sprite("slimeGreen.png", LASER_SPRITE_SCALING)
                 # The image points to the right, and we want it to point up. So
                 # rotate it.
@@ -286,7 +371,7 @@ class MyWindow(arcade.Window):
             changed = True
 
         # Scroll up
-        top_boundary = self.view_bottom + SCREEN_HEIGHT - TOP_MARGIN
+        top_boundary = self.view_bottom + SCREEN_HEIGHT
         if self.player_sprite.top > top_boundary:
             self.view_bottom += self.player_sprite.top - top_boundary
             changed = True
@@ -314,17 +399,19 @@ class MyWindow(arcade.Window):
 
         self.player_list.update()
 
-        lava_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.lava_list)
+        for self.player_sprite in self.player_list:
+            lava_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.lava_list)
 
-        for self.player_sprite in lava_hit_list:
-            self.player_sprite.remove_from_sprite_lists()
-            arcade.play_sound(self.game_over_sound)
+            for lava_hit in lava_hit_list:
+                self.player_sprite.remove_from_sprite_lists()
+                arcade.play_sound(self.game_over_sound)
 
-        player_enemy_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.enemy_list)
+        for self.player_sprite in self.player_list:
+            player_enemy_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.enemy_list)
 
-        for self.player_sprite in player_enemy_hit_list:
-            self.player_sprite.remove_from_sprite_lists()
-            arcade.play_sound(self.game_over_sound)
+            for enemy_hit in player_enemy_hit_list:
+                self.player_sprite.remove_from_sprite_lists()
+                arcade.play_sound(self.game_over_sound)
 
         self.enemy_list.update()
         self.laser_list.update()
@@ -335,6 +422,23 @@ class MyWindow(arcade.Window):
             for laser_hit in laser_hit_list:
                 laser_hit.remove_from_sprite_lists()
                 enemy.remove_from_sprite_lists()
+                arcade.play_sound(self.enemy_sound)
+
+        for laser in self.laser_list:
+            wall_hit_list = arcade.check_for_collision_with_list(laser, self.wall_list)
+
+            for laser_hit in wall_hit_list:
+                laser.remove_from_sprite_lists()
+
+        self.coin_list.update()
+
+        coins_hit_list = arcade.check_for_collision_with_list(self.player_sprite,
+                                                              self.coin_list)
+
+        for coin in coins_hit_list:
+            coin.remove_from_sprite_lists()
+            self.score += 1
+            arcade.play_sound(self.coin_sound)
 
 
 def main():
