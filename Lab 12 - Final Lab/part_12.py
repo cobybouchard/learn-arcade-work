@@ -313,7 +313,7 @@ class MyWindow(arcade.Window):
         if self.player_lives == 0:
             arcade.draw_text("Game Over", 250 + self.view_left, 125,
                              arcade.color.BLACK, 75)
-        if self.player_sprite.center_x <= 130 and self.player_lives != 0:
+        if self.player_sprite.center_x <= 130 and self.player_lives == 3:
             arcade.draw_text(f"Move to Start. \nCollect as many coins \nas possible and avoid \nthe lava and worms."
                              f"\nTo win, collect the gem \nat end of the map."
                              f"\nYou have {self.player_lives} left.",
