@@ -1,8 +1,5 @@
 """
-Load a map stored in csv format, as exported by the program 'Tiled.'
-
-Artwork from: http://kenney.nl
-Tiled available from: http://www.mapeditor.org/
+Aliens vs. Worms
 """
 import arcade
 
@@ -88,6 +85,7 @@ class MyWindow(arcade.Window):
         self.gem_sprite = None
         self.laser_sprite = None
         self.score = None
+        self.player_lives = None
 
         # Physics engine
         self.physics_engine = None
@@ -115,6 +113,7 @@ class MyWindow(arcade.Window):
         self.enemy_list = arcade.SpriteList()
 
         self.score = 0
+        self.player_lives = 3
 
         # Set up the player
         self.player_sprite = arcade.Sprite("alienBlue_walk2.png", PLAYER_SPRITE_SCALING)
@@ -201,13 +200,13 @@ class MyWindow(arcade.Window):
 
         enemy = arcade.Sprite("wormPink.png", SPRITE_SCALING)
         enemy.center_x = 2400
-        enemy.center_y = 110
+        enemy.center_y = 130
 
         self.enemy_list.append(enemy)
 
         enemy = arcade.Sprite("wormPink.png", SPRITE_SCALING)
         enemy.center_x = 2940
-        enemy.center_y = 55
+        enemy.center_y = 60
 
         self.enemy_list.append(enemy)
 
@@ -306,17 +305,25 @@ class MyWindow(arcade.Window):
         output = f"Score: {self.score}"
         arcade.draw_text(output, self.view_left + 10, self.view_bottom + 20, arcade.color.BLACK, 14)
 
+        arcade.draw_text(f"Lives left: {self.player_lives}", self.view_left + 10, self.view_bottom + 50,
+                         arcade.color.BLACK, 14)
+
         if len(self.gem_list) == 0:
             arcade.draw_text("You Win", 325 + self.view_left, 125, arcade.color.BLACK, 75)
-        if len(self.player_list) == 0:
+        if self.player_lives == 0:
             arcade.draw_text("Game Over", 250 + self.view_left, 125,
                              arcade.color.BLACK, 75)
+        if self.player_sprite.center_x <= 130 and self.player_lives != 0:
+            arcade.draw_text(f"Move to Start. \nCollect as many coins \nas possible and avoid \nthe lava and worms."
+                             f"\nTo win, collect the gem \nat end of the map."
+                             f"\nYou have {self.player_lives} left.",
+                             100 + self.view_left, 0, arcade.color.BLACK, 40)
 
     def on_key_press(self, key, modifiers):
         """
         Called whenever the mouse moves.
         """
-        if len(self.player_list) != 0 and len(self.gem_list) != 0:
+        if self.player_lives != 0 and len(self.gem_list) != 0:
             if key == arcade.key.UP:
                 # This line below is new. It checks to make sure there is a platform underneath
                 # the player. Because you can't jump if there isn't ground beneath your feet.
@@ -405,6 +412,10 @@ class MyWindow(arcade.Window):
             for lava_hit in lava_hit_list:
                 self.player_sprite.remove_from_sprite_lists()
                 arcade.play_sound(self.game_over_sound)
+                self.player_lives -= 1
+                self.player_sprite.center_x = 90
+                self.player_sprite.center_y = -40
+                self.player_list.append(self.player_sprite)
 
         for self.player_sprite in self.player_list:
             player_enemy_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.enemy_list)
@@ -412,6 +423,11 @@ class MyWindow(arcade.Window):
             for enemy_hit in player_enemy_hit_list:
                 self.player_sprite.remove_from_sprite_lists()
                 arcade.play_sound(self.game_over_sound)
+                self.player_lives -= 1
+
+                self.player_sprite.center_x = 90
+                self.player_sprite.center_y = -40
+                self.player_list.append(self.player_sprite)
 
         self.enemy_list.update()
         self.laser_list.update()
